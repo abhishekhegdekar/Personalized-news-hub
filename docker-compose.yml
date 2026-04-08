@@ -1,0 +1,72 @@
+services:
+
+  # --- PHP-FPM Application ---
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: newsflow_app
+    restart: unless-stopped
+    volumes:
+      - .:/var/www/html
+      # Keep the storage/cache writable inside the container
+      - newsflow_cache:/var/www/html/storage/cache
+    environment:
+      NEWSFLOW_DB_HOST: ${NEWSFLOW_DB_HOST:-db}
+      NEWSFLOW_DB_PORT: ${NEWSFLOW_DB_PORT:-3306}
+      NEWSFLOW_DB_NAME: ${NEWSFLOW_DB_NAME:-news_hub}
+      NEWSFLOW_DB_USER: ${NEWSFLOW_DB_USER:-newsflow}
+      NEWSFLOW_DB_PASS: ${NEWSFLOW_DB_PASS:-newsflow_pass}
+      NEWSFLOW_API_KEY_1: ${NEWSFLOW_API_KEY_1}
+      NEWSFLOW_API_KEY_2: ${NEWSFLOW_API_KEY_2}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - newsflow_net
+
+  # --- Nginx Web Server ---
+  web:
+    image: nginx:1.25-alpine
+    container_name: newsflow_web
+    restart: unless-stopped
+    ports:
+      - "8090:80"
+    volumes:
+      - .:/var/www/html:ro
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - app
+    networks:
+      - newsflow_net
+
+  # --- MySQL Database ---
+  db:
+    image: mysql:8.0
+    container_name: newsflow_db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-12345678}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-news_hub}
+      MYSQL_USER: ${MYSQL_USER:-newsflow}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-newsflow_pass}
+    volumes:
+      - newsflow_db_data:/var/lib/mysql
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/schema.sql:ro
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "--password=${MYSQL_ROOT_PASSWORD:-12345678}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - newsflow_net
+
+volumes:
+  newsflow_db_data:
+  newsflow_cache:
+
+
+networks:
+  newsflow_net:
+    driver: bridge

@@ -1,0 +1,19 @@
+# Environment secrets
+.env
+
+# PHP / dependency artifacts
+vendor/
+*.log
+
+# Cache files (only keep directory placeholder)
+storage/cache/
+storage/*.json
+
+# OS artifacts
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp

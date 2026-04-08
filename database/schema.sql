@@ -45,8 +45,6 @@ CREATE TABLE IF NOT EXISTS saved_articles (
   saved_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   KEY idx_saved_user_time (user_id, saved_at),
   KEY idx_saved_user_category (user_id, category),
-  -- url is TEXT; add a prefix index for dedupe checks
-  KEY idx_saved_user_url_prefix (user_id, (url(180))),
   CONSTRAINT fk_saved_articles_user
     FOREIGN KEY (user_id) REFERENCES users(id)
     ON DELETE CASCADE ON UPDATE CASCADE
