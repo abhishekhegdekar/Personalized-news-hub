@@ -8,7 +8,8 @@ layout_header('Saved Articles', 'saved');
 ?>
 
 <div class="section">
-  <div class="section__title">Your bookmarks</div>
+  <div class="section__title">Saved Articles</div>
+  <div style="color:var(--muted); margin-bottom: 10px;">Articles you bookmarked for later.</div>
   <div id="savedMount" class="panel">Loading…</div>
 </div>
 

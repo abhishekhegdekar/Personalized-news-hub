@@ -15,7 +15,7 @@ function require_login(): int
 {
   $uid = current_user_id();
   if (!$uid) {
-    redirect('pages/login.php');
+    redirect('/pages/login.php');
   }
   return $uid;
 }

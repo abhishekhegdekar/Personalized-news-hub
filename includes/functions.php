@@ -33,7 +33,12 @@ function require_method(string $method): void
 
 function redirect(string $path): void
 {
-  $url = APP_BASE_URL ? rtrim(APP_BASE_URL, '/') . '/' . ltrim($path, '/') : $path;
+  // Prefer absolute paths (starting with "/") to avoid accidental double paths like /pages/pages/...
+  // If APP_BASE_URL is set (e.g., http://localhost/newsflow), it will be prepended.
+  if ($path !== '' && $path[0] !== '/') {
+    $path = '/' . ltrim($path, '/');
+  }
+  $url = APP_BASE_URL ? rtrim(APP_BASE_URL, '/') . $path : $path;
   header('Location: ' . $url);
   exit;
 }
